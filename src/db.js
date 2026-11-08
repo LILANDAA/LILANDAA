@@ -6,6 +6,25 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+// node:sqlite only exists in Node.js 22.5+. Explain that plainly instead of
+// crashing with ERR_UNKNOWN_BUILTIN_MODULE.
+const [major, minor] = process.versions.node.split('.').map(Number);
+if (major < 22 || (major === 22 && minor < 5)) {
+  console.error(`
+  This POS needs Node.js version 22.5 or newer, but this computer ran it
+  with Node.js ${process.version} (${process.execPath}).
+
+  How to fix:
+    1. Install the LTS version from https://nodejs.org
+    2. If it is already installed, an older Node.js is being found first.
+       Run "where node" to see every copy, and uninstall the old version
+       (Settings > Apps > Installed apps > Node.js).
+    3. Close this window, open a new Command Prompt and run: node --version
+
+  Your data in the "data" folder is safe and has not been changed.
+`);
+  process.exit(1);
+}
 const { DatabaseSync } = require('node:sqlite');
 
 const SCHEMA = `
